@@ -2,6 +2,7 @@
   <configuration default="false" name="gorchitect" type="GoApplicationRunConfiguration" factoryName="Go Application">
     <module name="gorchitect" />
     <working_directory value="$PROJECT_DIR$" />
+    <parameters value="-o ./out ./main.go" />
     <kind value="FILE" />
     <filePath value="$PROJECT_DIR$/gorchitect.go" />
     <directory value="$PROJECT_DIR$" />
