@@ -1,6 +1,7 @@
 # gorchitect
 
-#### Gorchitect takes a Go program and concurrently compiles it for every available GOOS and GOARCH. This will allow you to do this in one go instead of repetitively compiling.
+Gorchitect takes a Go program and concurrently compiles it for every available GOOS and GOARCH. This will allow you to
+do this in one go instead of repetitively compiling.
 
 ### Installation
 
@@ -10,4 +11,5 @@
 ### Usage
 
 - `./gorchitect --help` to list and see description of arguments.
-- `-o` flag used to provide path to directory where binaries should be compiled to.
+- `-o` flag used to provide a path to directory where binaries should be compiled to.
+- `-n' flag user to control number of concurrent compilations (defaults to number of CPUs).
