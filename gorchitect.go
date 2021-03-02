@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/rhobro/goutils/pkg/util"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -30,6 +31,10 @@ func init() {
 
 	// mkdir out
 	util.Check(os.MkdirAll(out, os.ModePerm))
+
+	if path == "" {
+		log.Fatal("No path to Go program provided")
+	}
 }
 
 // semaphore to limit concurrency
@@ -50,6 +55,12 @@ func main() {
 		goOS, goArch := spl[0], spl[1]
 
 		out := filepath.Join(out, fmt.Sprintf("%s_%s_%s", name, goOS, goArch))
+		if goOS == "windows" {
+			out += ".exe"
+		}
+		if goArch == "wasm" {
+			out += ".wasm"
+		}
 		cmd := exec.Command("go", "build", "-o", out, path)
 		cmd.Env = os.Environ()
 		cmd.Env = append(cmd.Env, "GOOS="+goOS)
