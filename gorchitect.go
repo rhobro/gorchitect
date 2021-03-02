@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/rhobro/goutils/pkg/util"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -55,10 +54,7 @@ func main() {
 
 		semaphore <- struct{}{}
 		go func() {
-			err := cmd.Run()
-			if err != nil {
-				log.Print(err)
-			}
+			_ = cmd.Run()
 			<-semaphore
 		}()
 	}
