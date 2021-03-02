@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/rhobro/goutils/pkg/util"
 	"io/ioutil"
 	"log"
 	"os"
@@ -13,23 +14,25 @@ import (
 
 var path string
 var out string
+var nProcesses int
 
 func init() {
 	// args and flags
 	wd, err := os.Getwd()
-	if err != nil {
-		log.Fatal("can't get working directory")
-	}
+	util.Check(err)
 	flag.StringVar(&out, "o", wd, "output path to which Go binaries should be compiled to")
+	flag.IntVar(&nProcesses, "n", 5, "number of goroutines to use to concurrently compile")
 	flag.Parse()
-	path = os.Args[len(os.Args)-1]
+
+	path = flag.Arg(0)
+	semaphore = make(chan struct{}, nProcesses)
 
 	// mkdir out
-	err = os.MkdirAll(out, os.ModePerm)
-	if err != nil {
-		log.Fatal("can't create output directory")
-	}
+	util.Check(os.MkdirAll(out, os.ModePerm))
 }
+
+// semaphore to limit concurrency
+var semaphore chan struct{}
 
 func main() {
 	// get executable name
@@ -50,18 +53,23 @@ func main() {
 		cmd.Env = append(cmd.Env, "GOOS="+goOS)
 		cmd.Env = append(cmd.Env, "GOARCH="+goArch)
 
-		err := cmd.Run()
-		if err != nil {
-			log.Print(err)
-		}
+		semaphore <- struct{}{}
+		go func() {
+			err := cmd.Run()
+			if err != nil {
+				log.Print(err)
+			}
+			<-semaphore
+		}()
 	}
 }
 
-func execute(c *exec.Cmd) (s string) {
-	out, _ := c.StdoutPipe()
-	c.Start()
+func execute(c *exec.Cmd) string {
+	out, err := c.StdoutPipe()
+	util.Check(err)
+	util.Check(c.Start())
 	bd, _ := ioutil.ReadAll(out)
-	c.Wait()
+	util.Check(c.Wait())
 
 	return string(bd)
 }
